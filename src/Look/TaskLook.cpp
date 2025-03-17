@@ -26,6 +26,7 @@ TaskLook::Initialise()
   arrow_inactive_pen.Create(Layout::ScalePenWidth(1), task_color);
 
   isoline_pen.Create(Pen::DASH2, Layout::ScalePenWidth(1), isoline_color);
+  _95p_isoline_pen.Create(Pen::SOLID, Layout::ScalePenWidth(1), Color(0x00, 0xb0, 0x00));
 
   bearing_pen.Create(Layout::ScalePenWidth(2),
                   HasColors() ? bearing_color : COLOR_BLACK);

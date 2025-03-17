@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <array>
+#include <memory>
 #include "Geo/GeoPoint.hpp"
 #include "Geo/Flat/FlatBoundingBox.hpp"
 #include "MapWindow/MapCanvas.hpp"
@@ -17,6 +19,8 @@ class OrderedTaskPoint;
 class AATPoint;
 class FlatProjection;
 struct TaskLook;
+struct BulkPixelPoint;
+class AATIsolineSegment;
 
 class TaskPointRenderer
 {
@@ -47,6 +51,7 @@ private:
 
   bool task_finished = false;
   bool mode_optional_start = false;
+  constexpr static int isoline_polyline_size = 21;
 
 public:
   enum class Layer : uint_least8_t {
@@ -113,6 +118,10 @@ private:
   void DrawTarget(const TaskPoint &tp) noexcept;
   void DrawTaskLine(const GeoPoint &start, const GeoPoint &end) noexcept;
   void DrawIsoline(const AATPoint &tp) noexcept;
+  void Draw95pIsoline(const AATPoint &tp) noexcept;
+  std::unique_ptr<std::array<BulkPixelPoint, isoline_polyline_size>> 
+  IsolinePixels(const AATIsolineSegment &seg) const noexcept;
+
   void DrawOZBackground(Canvas &canvas, const OrderedTaskPoint &tp,
                         int offset) noexcept;
   void DrawOZForeground(const OrderedTaskPoint &tp, int offset) noexcept;

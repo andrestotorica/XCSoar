@@ -5,6 +5,8 @@
 #include "Task/PathSolvers/IsolineCrossingFinder.hpp"
 #include "Util/Tolerances.hpp"
 
+#include "Points/AATPoint.hpp"
+
 AATIsolineSegment::AATIsolineSegment(const AATPoint &ap,
                                      const FlatProjection &projection) noexcept
   :AATIsoline(ap, projection)
@@ -33,4 +35,28 @@ AATIsolineSegment::Parametric(const double t) const noexcept
 {
   const auto r = t * (t_up - t_down) + t_down;
   return ell.Parametric(r);
+}
+
+TestSegment::TestSegment(const AATPoint &ap,
+              const FlatProjection &projection) noexcept
+:AATIsolineSegment(ap, projection)
+{
+  GeoPoint x = ap.GetTargetLocation();
+  GeoPoint x2 = GeoPoint(x.longitude, x.latitude+Angle::Degrees(0.1));
+
+  ell = GeoEllipse(ap.GetPrevious()->GetLocationRemaining(),
+                   ap.GetNext()->GetLocationRemaining(),
+                   x2, projection);
+
+  IsolineCrossingFinder icf_up(ap, ell, 0, 0.5);
+  IsolineCrossingFinder icf_down(ap, ell, -0.5, 0);
+
+  t_up = icf_up.solve();
+  t_down = icf_down.solve();
+
+  if (t_up < -0.5 || t_down < -0.5) {
+    t_up = 0;
+    t_down = 0;
+    // single solution only
+  }
 }

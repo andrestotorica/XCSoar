@@ -17,6 +17,7 @@ struct TaskLook {
   Pen arrow_active_pen;
   Pen arrow_inactive_pen;
   Pen isoline_pen;
+  Pen _95p_isoline_pen;
 
   Pen bearing_pen;
   Pen best_cruise_track_pen;

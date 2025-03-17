@@ -11,6 +11,9 @@
 #include "Math/Screen.hpp"
 #include "OZRenderer.hpp"
 
+//delete me
+#include "Geo/GeoEllipse.hpp"
+
 TaskPointRenderer::TaskPointRenderer(Canvas &_canvas,
                                      const WindowProjection &_projection,
                                      const TaskLook &_task_look,
@@ -138,6 +141,30 @@ TaskPointRenderer::DrawTaskLine(const GeoPoint &start,
   canvas.DrawPolyline(Arrow, 3);
 }
 
+inline std::unique_ptr<std::array<BulkPixelPoint, TaskPointRenderer::isoline_polyline_size>>
+TaskPointRenderer::IsolinePixels(const AATIsolineSegment &seg) const noexcept
+{
+  if (!seg.IsValid())
+    return nullptr;
+
+  GeoPoint start = seg.Parametric(0);
+  GeoPoint end = seg.Parametric(1);
+
+  if (m_proj.GeoToScreenDistance(start.DistanceS(end)) <= 2)
+    return nullptr;
+
+  std::array<BulkPixelPoint, isoline_polyline_size> p;
+  p.front() = m_proj.GeoToScreen(start);
+  p.back() = m_proj.GeoToScreen(end);
+
+  for (unsigned i = 1; i < p.size()-1; ++i) {
+    auto t = static_cast<double>(i) / (p.size()-1);
+    GeoPoint ga = seg.Parametric(t);
+    p[i] = m_proj.GeoToScreen(ga);
+  }
+  return std::make_unique<std::array<BulkPixelPoint, isoline_polyline_size>>(p);
+}
+
 inline void
 TaskPointRenderer::DrawIsoline(const AATPoint &tp) noexcept
 {
@@ -145,30 +172,30 @@ TaskPointRenderer::DrawIsoline(const AATPoint &tp) noexcept
     return;
 
   AATIsolineSegment seg(tp, flat_projection);
-  if (!seg.IsValid())
-    return;
 
-  GeoPoint start = seg.Parametric(0);
-  GeoPoint end = seg.Parametric(1);
-
-  if (m_proj.GeoToScreenDistance(start.DistanceS(end)) <= 2)
-    return;
-
-  BulkPixelPoint screen[21];
-  screen[0] = m_proj.GeoToScreen(start);
-  screen[20] = m_proj.GeoToScreen(end);
-
-  for (unsigned i = 1; i < 20; ++i) {
-    constexpr double twentieth = 1.0 / 20.0;
-    auto t = i * twentieth;
-    GeoPoint ga = seg.Parametric(t);
-    screen[i] = m_proj.GeoToScreen(ga);
+  if (auto pixels = IsolinePixels(seg)) {
+    canvas.Select(task_look.isoline_pen);
+    canvas.SetBackgroundTransparent();
+    canvas.DrawPolyline(pixels->data(), pixels->size());
+    canvas.SetBackgroundOpaque();
   }
+}
 
-  canvas.Select(task_look.isoline_pen);
-  canvas.SetBackgroundTransparent();
-  canvas.DrawPolyline(screen, 21);
-  canvas.SetBackgroundOpaque();
+inline void
+TaskPointRenderer::Draw95pIsoline(const AATPoint &tp) noexcept
+{
+  if (!tp.valid() || !IsTargetVisible(tp))
+    return;
+
+//  AATIsolineSegment seg(tp, flat_projection);
+  TestSegment       seg(tp, flat_projection);
+
+  if (auto pixels = IsolinePixels(seg)) {
+    canvas.Select(task_look._95p_isoline_pen);
+    canvas.SetBackgroundTransparent();
+    canvas.DrawPolyline(pixels->data(), pixels->size());
+    canvas.SetBackgroundOpaque();
+  }
 }
 
 inline void
@@ -235,6 +262,8 @@ TaskPointRenderer::Draw(const TaskPoint &tp, Layer layer) noexcept
     DrawOrdered(otp, layer);
     if (layer == Layer::SYMBOLS) {
       DrawIsoline(atp);
+      // if MapSettings map_settings.show_95_percent_rule_helpers
+      Draw95pIsoline(atp);
       DrawBearing(tp);
       DrawTarget(tp);
     }

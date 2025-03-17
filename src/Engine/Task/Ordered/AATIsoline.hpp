@@ -20,7 +20,7 @@ class AATIsoline
 {
 protected:
   /** ellipse representing the isoline segment */
-  const GeoEllipse ell;
+  GeoEllipse ell;
 
 public:
   /**

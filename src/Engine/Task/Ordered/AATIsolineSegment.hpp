@@ -16,6 +16,7 @@
  */
 class AATIsolineSegment: public AATIsoline
 {
+  protected:
   double t_up;
   double t_down;
 
@@ -48,4 +49,11 @@ public:
    */
   [[gnu::pure]]
   GeoPoint Parametric(double t) const noexcept;
+};
+
+class TestSegment : public AATIsolineSegment {
+public:
+  TestSegment(const AATPoint &ap,
+              const FlatProjection &projection) noexcept;
+
 };
