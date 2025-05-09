@@ -255,9 +255,9 @@ jobs:
         run: |
           if [ ${{ matrix.target }} = 'ANDROID' ]; then
             make -j$(nproc) TARGET=ANDROIDBUNDLE DEBUG=${{ env.DEBUG }} USE_CCACHE=y V=2 \
-            output/ANDROID/bin/${{ matrix.target_bin }}-debug${{ matrix.target_ext }}
-            mv output/ANDROID/bin/${{ matrix.target_bin }}-debug${{ matrix.target_ext }} \
-            output/ANDROID/bin/${{ matrix.target_bin }}${{ matrix.target_ext }}
+            output/ANDROID_BUNDLE/bin/${{ matrix.target_bin }}-debug${{ matrix.target_ext }}
+            mv output/ANDROID_BUNDLE/bin/${{ matrix.target_bin }}-debug${{ matrix.target_ext }} \
+            output/ANDROID_BUNDLE/bin/${{ matrix.target_bin }}${{ matrix.target_ext }}
           elif [ ${{ matrix.target }} = "WIN64" ]; then
             make -j$(nproc) TARGET=${{ matrix.target }} DEBUG=${{ env.DEBUG }} USE_CCACHE=y V=2 everything
           elif [ ${{ matrix.target }} = "PC" ]; then
@@ -295,7 +295,7 @@ jobs:
               ANDROID_KEYSTORE=$(HOME)/.android/signing-key.jks ANDROID_KEY_ALIAS=${{ secrets.XCSOAR_UPLOAD_KEY_JKS_KEY_ALIAS }}
             else
               make -j$(nproc) TARGET=ANDROIDBUNDLE DEBUG=${{ env.DEBUG }} USE_CCACHE=y V=2 \
-              output/ANDROID/bin/${{ matrix.target_bin }}${{ matrix.target_ext }}
+              output/ANDROID_BUNDLE/bin/${{ matrix.target_bin }}${{ matrix.target_ext }}
             fi
           elif [ ${{ matrix.target }} = "WIN64" ]; then
             make -j$(nproc) TARGET=${{ matrix.target }} DEBUG=${{ env.DEBUG }} USE_CCACHE=y V=2 everything
